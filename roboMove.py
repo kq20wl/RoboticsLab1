@@ -71,8 +71,8 @@ class position_setter:
         self.y = max(min_y, min(max_y, y))
         # Use inverse kinematics
         t1,t2 = self.inverse_kinematics()
-        d1 = math.degrees(t1)
-        d2 = math.degrees(t2)
+        d1 = math.degrees(t1) + 120
+        d2 = 180 - math.degrees(t2)
         self.shoulderPos = self.map_range(d1, -90, 90, 75, 375)
         self.elbowPos = self.map_range(d2, 0, 180, 75, 430)
         print("Target:", self.x, self.y)
