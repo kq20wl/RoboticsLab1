@@ -1,6 +1,6 @@
 import serial
 import tkinter as tk
-
+import time
 #ssc32 = serial.Serial('/dev/ttyS0', 115200)
 ssc32 = serial.Serial('COM4', 115200)
 step_size=10
@@ -14,6 +14,129 @@ defaults = {
     "rotate": 1400,
     "grip": 1000
 }
+# Exact places
+r1c1 = {
+    "base": 1680,
+    "shoulder": 1600,
+    "elbow": 1750,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r1c2  = {
+    "base": 1500,
+    "shoulder": 1600,
+    "elbow": 1700,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r1c3 = {
+    "base": 1300,
+    "shoulder": 1700,
+    "elbow": 1700,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r2c1 = {
+    "base": 1670,
+    "shoulder": 1330,
+    "elbow": 1500,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r2c2 = {
+    "base": 1500,
+    "shoulder": 1400,
+    "elbow": 1500,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r2c3 = {
+    "base": 1400,
+    "shoulder": 1400,
+    "elbow": 1500,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r3c1 = {
+    "base": 1650,
+    "shoulder": 1200,
+    "elbow": 1250,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r3c2 = {
+    "base": 1500,
+    "shoulder": 1200,
+    "elbow": 1250,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+r3c3 = {
+    "base": 1400,
+    "shoulder": 1200,
+    "elbow": 1250,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+
+# ---------------------------pick up coordinates
+base = {
+    "base": 1200,
+    "shoulder": 1550,
+    "elbow": 1550,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1000
+}
+base_grip = {
+    "base": 1200,
+    "shoulder": 1550,
+    "elbow": 1550,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1400
+}
+p1 = {
+    "base": 1200,
+    "shoulder": 1550,
+    "elbow": 1600,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1000
+}
+p2 = {
+    "base": 1200,
+    "shoulder": 1550,
+    "elbow": 1660,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1000
+}
+p3 = {
+    "base": 1200,
+    "shoulder": 1500,
+    "elbow": 1670,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1000
+}
+p4 = {
+    "base": 1200,
+    "shoulder": 1470,
+    "elbow": 1700,
+    "wrist": 1300,
+    "rotate": 1400,
+    "grip": 1000
+}
 fields = {
     "base": "#0 P",
     "shoulder": "#1 P",
@@ -22,7 +145,6 @@ fields = {
     "rotate": "#4 P",
     "grip": "#5 P"
 }
-
 def increment(entry):
     try:
         value = int(entry.get())
@@ -170,14 +292,18 @@ def play_game():
     board = [['','',''], ['','',''], ['','','']]
     board_ai = [[0,0,0], [0,0,0], [0,0,0]] # 1 is player 1 and 2 is player 2 (or AI)
     current_player = 'X'
+    increment_block = 0
     while True:
+        
         print_board(board)
-        if current_player == 'O':
+        if current_player == 'X':
             row, col = get_player_move(current_player, board)
         else:
+            increment_block += 1
             row, col = ai_move(board_ai) # 2 is ai value move
+            real_board(row,col, increment_block)
         board[row][col] = current_player
-        board_ai[row][col] = 1 if current_player == 'O' else 2
+        board_ai[row][col] = 1 if current_player == 'X' else 2
         if check_winner(board, current_player):
             print_board(board)
             print(f"Player {current_player} wins!")
@@ -188,9 +314,73 @@ def play_game():
             break
         current_player = 'O' if current_player == 'X' else 'X'
 
-# play_game()
-# --------------------------------------------------------------------------------------
+def real_board(row, col, increment_block):
+    
+    # Map coordinates to your dictionary variables
+    mapping = {
+        (0,0): r1c1, (0,1): r1c2, (0,2): r1c3,
+        (1,0): r2c1, (1,1): r2c2, (1,2): r2c3,
+        (2,0): r3c1, (2,1): r3c2, (2,2): r3c3
+    }
+    mapping_block = {
+        (1): p1,
+        (2): p2,
+        (3): p3,
+        (4): p4
+    }
 
+    destination = mapping.get((row, col))
+    block_pick = mapping_block.get(increment_block)
+    print("index: ", increment_block)
+    # print(block_pick)
+    if destination:
+        # Go to block area
+        for label, entry in entries.items():
+            entry.delete(0, tk.END)
+            entry.insert(0, str(base[label]))
+        display()
+        send()
+        time.sleep(2)
+        for label, entry in entries.items():
+            entry.delete(0, tk.END)
+            print(label, ": ", block_pick[label])
+            entry.insert(0, str(block_pick[label]))
+        display()
+        send()
+        time.sleep(2)
+        # Pick block
+        block_pick["grip"] = 1400
+        for label, entry in entries.items():
+            entry.delete(0, tk.END)
+            entry.insert(0, str(block_pick[label]))
+        display()
+        send()
+        time.sleep(2)
+        # Go to block area
+        for label, entry in entries.items():
+            entry.delete(0, tk.END)
+            entry.insert(0, str(base_grip[label]))
+        display()
+        send()
+        time.sleep(2)
+        # Go to destination
+        for label, entry in entries.items():
+            entry.delete(0, tk.END)
+            entry.insert(0, str(destination[label]))
+        display()
+        send()
+        time.sleep(2)
+        # Drop Block
+        destination["grip"] = 1000
+        for label, entry in entries.items():
+            entry.delete(0, tk.END)
+            entry.insert(0, str(destination[label]))
+        display()
+        send()
+    else:
+        print(f"Error: No move defined for {row}, {col}")
+# --------------------------------------------------------------------------------------
+ 
 root = tk.Tk()
 root.title("Numeric Input GUI")
 
@@ -230,8 +420,8 @@ send_button.pack(pady=10)
 # Create the output field
 output_field = tk.Entry(root, width=60, justify=tk.LEFT)
 output_field.pack(pady=10)
-
 display()
 
+play_game()
 # Run the main loop
 root.mainloop()
